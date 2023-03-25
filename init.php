@@ -36,18 +36,21 @@ if ( $webPropertyId !== null )
     function ganalytics_add_code()
     {
 
-        $code = '<script type="text/javascript">
-            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-            document.write(unescape("%3Cscript src=\'" + gaJsHost + "google-analytics.com/ga.js\' type=\'text/javascript\'%3E%3C/script%3E"));
-            </script>
-            <script type="text/javascript">
-            try {
-                var pageTracker = _gat._getTracker("' . trim(OW::getConfig()->getValue('ganalytics', 'web_property_id')) . '");
-                pageTracker._trackPageview();
-            } catch(err) {}
-            </script>';
+        $webPropertyId = trim(OW::getConfig()->getValue('ganalytics', 'web_property_id'));
+		$userId = OW::getUser()->getId();
+		$sUid = '';
+		if ($userId > 0)
+			$sUid = '\'user_id\':\''. $userId .'\',';	
+		
+        $code = '<!-- Google tag (gtag.js) -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=' . $webPropertyId . '"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag(\'js\', new Date());
 
-        OW::getDocument()->appendBody($code);
+			gtag(\'config\', \''. $webPropertyId . '\', {' . $sUid. '});
+		</script>';
     }
     OW::getEventManager()->bind(OW_EventManager::ON_FINALIZE, 'ganalytics_add_code');
 }
